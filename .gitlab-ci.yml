@@ -1,0 +1,36 @@
+image: registry.cresol.coop.br:5000/cresol-pipeline-helper-image:mvn3-jdk17
+
+include:
+  # Essentials
+  - project: "templates/mac/ci-cd-templates"
+    ref: v1
+    file: "/essencials/stages-and-variables.yml"
+
+###############
+# BACKEND DEV #
+###############
+docker-build-and-push-back-dev:
+  stage: docker-build-and-push-back-dev
+  extends: .docker-build-and-push
+  variables:
+    AZURE_REGISTRY: $AZURE_REGISTRY_MAC_DEV
+    AZURE_USERNAME: $AZURE_LOGIN_MAC_DEV
+    AZURE_PASSWORD: $AZURE_PASSWORD_MAC_DEV  
+  before_script:
+    - echo $AZURE_PASSWORD_MAC_DEV | docker login $AZURE_REGISTRY -u $AZURE_USERNAME --password-stdin
+    #- mvn $MAVEN_CLI_OPTS package -DskipTests=true
+  tags:
+    - default    
+
+################
+# DOCKER BUILD #
+################
+.docker-build-and-push:
+  script:
+    #tagged
+    - tagged_name=$AZURE_REGISTRY/$CI_PROJECT_NAME:$IMAGE_TAG
+    - echo $tagged_name  
+    #docker build
+    - docker build -t $tagged_name .
+    #docker push    
+    - docker push $tagged_name

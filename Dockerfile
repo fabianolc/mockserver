@@ -1,4 +1,4 @@
-FROM openjdk:17-jdk-alpine3.14
+FROM bellsoft/liberica-openjdk-alpine:17
 WORKDIR /tmp
 COPY mockserver.jar /tmp/app.jar
 EXPOSE 8008
